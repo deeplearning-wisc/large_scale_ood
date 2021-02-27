@@ -113,7 +113,7 @@ def run_eval(model, data_loader, logger, step, writer, group_slices):
 
             # compute output, measure accuracy and record loss.
             logits = model(x)
-            if group_slices:
+            if group_slices is not None:
                 c, top1 = cal_acc(logits, y, group_slices)
             else:
                 c = torch.nn.CrossEntropyLoss(reduction='none')(logits, y)
