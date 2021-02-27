@@ -220,18 +220,21 @@ def main(args):
     # Only good if sizes stay the same within the main loop!
     torch.backends.cudnn.benchmark = True
 
-    train_set, valid_set, train_loader, valid_loader = mktrainval(args, logger)
 
     if args.finetune_type == 'group_softmax':
         classes_per_group = np.load(args.group_config)
         args.num_groups = len(classes_per_group)
         group_slices = get_group_slices(classes_per_group)
         group_slices.cuda()
-        num_logits = len(train_set.classes) + args.num_groups
     else:
         classes_per_group, args.num_groups, group_slices = None, None, None
-        num_logits = len(train_set.classes)
 
+    train_set, valid_set, train_loader, valid_loader = mktrainval(args, logger)
+    
+    num_logits = len(train_set.classes)
+    if args.finetune_type == 'group_softmax':
+        num_logits = len(train_set.classes) + args.num_groups
+    
     model = resnetv2.KNOWN_MODELS[args.model](head_size=num_logits,
                                               zero_head=True,
                                               num_block_open=args.num_block_open)

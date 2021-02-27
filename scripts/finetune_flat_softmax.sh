@@ -5,6 +5,7 @@ MODEL=BiT-S-R101x1
 python finetune.py \
 --name finetune_flat_softmax_${MODEL} \
 --model ${MODEL} \
+--bit_pretrained_dir bit_pretrained_models \
 --logdir checkpoints/finetune \
 --dataset imagenet2012 \
 --eval_every 200 \

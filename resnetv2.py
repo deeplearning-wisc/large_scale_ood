@@ -263,13 +263,7 @@ class ResNetV2(nn.Module):
             self.before_head.gn.weight.copy_(tf2th(weights[f'{prefix}group_norm/gamma']))
             self.before_head.gn.bias.copy_(tf2th(weights[f'{prefix}group_norm/beta']))
 
-            if self.normal_init:
-                m = self.head.conv
-                n = m.kernel_size[0] * m.kernel_size[1] * m.out_channels * m.in_channels
-                m.weight.data.normal_(0, math.sqrt(2. / n))
-                nn.init.zeros_(self.head.conv.bias)
-
-            elif self.zero_head:
+            if self.zero_head:
                 nn.init.zeros_(self.head.conv.weight)
                 nn.init.zeros_(self.head.conv.bias)
             else:
