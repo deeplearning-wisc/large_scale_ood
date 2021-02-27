@@ -2,5 +2,5 @@
 __pycache__*
 dataset/id_data/*
 dataset/ood_data/*
-bit_pretrained_models/*
+bit_pretrained_models
 checkpoints
