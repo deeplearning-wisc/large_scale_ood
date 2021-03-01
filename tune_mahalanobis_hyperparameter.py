@@ -320,7 +320,5 @@ if __name__ == "__main__":
                         help="Batch size.")
     parser.add_argument("--name", required=True,
                         help="Name of this run. Used for monitoring and checkpointing.")
-    parser.add_argument("--bit_pretrained_dir", default="bit_pretrained_models",
-                        help="Where to search for pretrained BiT models.")
 
     main(parser.parse_args())
