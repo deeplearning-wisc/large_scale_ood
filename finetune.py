@@ -24,8 +24,7 @@ import torchvision as tv
 
 import resnetv2
 
-from utils import common
-from utils import hyperrule
+from utils import finetune_utils, log
 from dataset import DatasetWithMeta, DatasetWithMetaGroup
 
 from tensorboardX import SummaryWriter
@@ -48,7 +47,7 @@ def recycle(iterable):
 
 def mktrainval(args, logger):
     """Returns train and validation datasets."""
-    precrop, crop = hyperrule.get_resolution_from_dataset(args.dataset)
+    precrop, crop = 512, 480
     train_tx = tv.transforms.Compose([
         tv.transforms.Resize((precrop, precrop)),
         tv.transforms.RandomCrop((crop, crop)),
@@ -213,13 +212,12 @@ def get_loss(criterion, logits, labels, group_slices):
 
 
 def main(args):
-    logger = common.setup_logger(args)
+    logger = log.setup_logger(args)
     writer = SummaryWriter(pjoin(args.logdir, args.name, 'tensorboard_log'))
 
     # Lets cuDNN benchmark conv implementations and choose the fastest.
     # Only good if sizes stay the same within the main loop!
     torch.backends.cudnn.benchmark = True
-
 
     if args.finetune_type == 'group_softmax':
         classes_per_group = np.load(args.group_config)
@@ -274,7 +272,7 @@ def main(args):
 
     model.train()
 
-    mixup = hyperrule.get_mixup(len(train_set))
+    mixup = finetune_utils.get_mixup(len(train_set))
     cri = torch.nn.CrossEntropyLoss().cuda()
 
     logger.info("Starting finetuning!")
@@ -288,7 +286,7 @@ def main(args):
         y = y.cuda()
 
         # Update learning-rate, including stop training if over.
-        lr = hyperrule.get_lr(step, len(train_set), args.base_lr)
+        lr = finetune_utils.get_lr(step, len(train_set), args.base_lr)
 
         if lr is None:
             break
@@ -354,21 +352,6 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = common.argparser()
-    parser.add_argument("--datadir", required=True,
-                        help="Path to the ImageNet data folder, preprocessed for torchvision.")
-    parser.add_argument("--workers", type=int, default=8,
-                        help="Number of background threads used to load data.")
-    parser.add_argument("--no-save", dest="save", action="store_false")
-
-    # parser.add_argument("--fix-backbone", dest="fix_backbone", action="store_true")
-    parser.add_argument("--num_block_open", type=int, choices=[-1, 0, 1, 2, 3, 4], default=0)
-
-    parser.add_argument("--train_list", type=str)
-    parser.add_argument("--val_list", type=str)
-
-    # group softmax arguments
-    parser.add_argument("--finetune_type", choices=['flat_softmax', 'group_softmax'], default='group_softmax')
-    parser.add_argument("--group_config", default="group_config/taxonomy_level0.npy")
+    parser = finetune_utils.argparser()
 
     main(parser.parse_args())

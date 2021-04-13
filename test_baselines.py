@@ -1,12 +1,11 @@
-from utils import common
+from utils import log
 import resnetv2
 import torch
 import time
 
 import numpy as np
 
-from utils.test_common import arg_parser, mk_id_ood, get_measures
-from torch.autograd import Variable
+from utils.test_utils import arg_parser, mk_id_ood, get_measures
 import os
 
 from sklearn.linear_model import LogisticRegressionCV
@@ -127,7 +126,7 @@ def run_eval(model, in_loader, out_loader, logger, args, num_classes):
     # switch to evaluate mode
     model.eval()
 
-    logger.info("Running validation...")
+    logger.info("Running test...")
     logger.flush()
 
     if args.score == 'MSP':
@@ -224,17 +223,16 @@ def run_eval(model, in_loader, out_loader, logger, args, num_classes):
 
 
 def main(args):
-    logger = common.setup_logger(args)
+    logger = log.setup_logger(args)
 
     torch.backends.cudnn.benchmark = True
 
     in_set, out_set, in_loader, out_loader = mk_id_ood(args, logger)
 
-    model_path = os.path.join(args.model_path, 'bit.pth.tar')
-    logger.info(f"Loading model from {model_path}")
+    logger.info(f"Loading model from {args.model_path}")
     model = resnetv2.KNOWN_MODELS[args.model](head_size=len(in_set.classes))
 
-    state_dict = torch.load(model_path)
+    state_dict = torch.load(args.model_path)
     model.load_state_dict_custom(state_dict['model'])
 
     model = torch.nn.DataParallel(model)

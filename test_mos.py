@@ -1,11 +1,11 @@
-from utils import common
+from utils import log
 import resnetv2
 import torch
 import time
 
 import numpy as np
 
-from utils.test_common import arg_parser, mk_id_ood, get_measures
+from utils.test_utils import arg_parser, mk_id_ood, get_measures
 from finetune import get_group_slices
 import os
 
@@ -45,7 +45,7 @@ def run_eval(model, in_loader, out_loader, logger, group_slices):
     # switch to evaluate mode
     model.eval()
 
-    logger.info("Running validation...")
+    logger.info("Running test...")
     logger.flush()
 
     logger.info("Processing in-distribution data...")
@@ -69,7 +69,7 @@ def run_eval(model, in_loader, out_loader, logger, group_slices):
 
 
 def main(args):
-    logger = common.setup_logger(args)
+    logger = log.setup_logger(args)
 
     # Lets cuDNN benchmark conv implementations and choose the fastest.
     # Only good if sizes stay the same within the main loop!
@@ -83,11 +83,10 @@ def main(args):
     group_slices.cuda()
     num_logits = len(in_set.classes) + args.num_groups
 
-    model_path = os.path.join(args.model_path, 'bit.pth.tar')
-    logger.info(f"Loading model from {model_path}")
+    logger.info(f"Loading model from {args.model_path}")
     model = resnetv2.KNOWN_MODELS[args.model](head_size=num_logits)
 
-    state_dict = torch.load(model_path)
+    state_dict = torch.load(args.model_path)
     model.load_state_dict_custom(state_dict['model'])
 
     model = torch.nn.DataParallel(model)

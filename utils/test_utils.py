@@ -1,7 +1,6 @@
 import argparse
 import torchvision as tv
 import torch
-from dataset import DatasetWithMeta
 import numpy as np
 import sklearn.metrics as sk
 
@@ -12,21 +11,18 @@ def arg_parser():
     parser.add_argument("--in_datadir", help="Path to the in-distribution data folder.")
     parser.add_argument("--out_datadir", help="Path to the out-of-distribution data folder.")
 
-    parser.add_argument("--in_data_list", type=str)
-    parser.add_argument("--out_data_list", type=str)
-
     parser.add_argument("--workers", type=int, default=8,
                         help="Number of background threads used to load data.")
 
     parser.add_argument("--logdir", required=True,
-                        help="Where to log training info (small).")
+                        help="Where to log test info (small).")
     parser.add_argument("--batch", type=int, default=256,
                         help="Batch size.")
     parser.add_argument("--name", required=True,
                         help="Name of this run. Used for monitoring and checkpointing.")
 
     parser.add_argument("--model", default="BiT-S-R101x1", help="Which variant to use")
-    parser.add_argument("--model_path", type=str)
+    parser.add_argument("--model_path", type=str, help="Path to the finetuned model you want to test")
 
     return parser
 
@@ -41,11 +37,11 @@ def mk_id_ood(args, logger):
         tv.transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
     ])
 
-    in_set = create_dataset(args.in_datadir, val_tx, args.in_data_list)
-    out_set = create_dataset(args.out_datadir, val_tx, args.out_data_list)
+    in_set = tv.datasets.ImageFolder(args.in_datadir, val_tx)
+    out_set = tv.datasets.ImageFolder(args.out_datadir, val_tx)
 
-    logger.info(f"Using a in-distribution set with {len(in_set)} images.")
-    logger.info(f"Using a out-of-distribution set with {len(out_set)} images.")
+    logger.info(f"Using an in-distribution set with {len(in_set)} images.")
+    logger.info(f"Using an out-of-distribution set with {len(out_set)} images.")
 
     in_loader = torch.utils.data.DataLoader(
         in_set, batch_size=args.batch, shuffle=False,
@@ -56,10 +52,6 @@ def mk_id_ood(args, logger):
         num_workers=args.workers, pin_memory=True, drop_last=False)
 
     return in_set, out_set, in_loader, out_loader
-
-
-def create_dataset(datadir, trans, data_list=None):
-    return DatasetWithMeta(datadir, data_list, trans)
 
 
 def stable_cumsum(arr, rtol=1e-05, atol=1e-08):

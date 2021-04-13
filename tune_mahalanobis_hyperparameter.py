@@ -1,4 +1,4 @@
-from utils import common
+from utils import log
 import resnetv2
 import torch
 import time
@@ -6,7 +6,7 @@ import torchvision as tv
 import numpy as np
 import argparse
 from dataset import DatasetWithMeta
-from utils.test_common import get_measures
+from utils.test_utils import get_measures
 import os
 from torch.autograd import Variable
 from utils.mahalanobis_lib import sample_estimator, get_Mahalanobis_score
@@ -69,13 +69,14 @@ def tune_mahalanobis_hyperparams(args, model, num_classes, train_loader, val_loa
 
     logger.info('get sample mean and covariance')
     filename = os.path.join(save_dir, 'mean_and_precision.npy')
-    if os.path.exists(filename):
-        sample_mean, precision = np.load(filename, allow_pickle=True)
-        sample_mean = [s.cuda() for s in sample_mean]
-        precision = [p.cuda() for p in precision]
-    else:
+
+    if not os.path.exists(filename):
         sample_mean, precision = sample_estimator(model, num_classes, feature_list, train_loader)
         np.save(filename, np.array([sample_mean, precision]))
+
+    sample_mean, precision = np.load(filename, allow_pickle=True)
+    sample_mean = [s.cuda() for s in sample_mean]
+    precision = [p.cuda() for p in precision]
 
     logger.info('train logistic regression model')
     m = 500
@@ -265,7 +266,7 @@ def tune_mahalanobis_hyperparams(args, model, num_classes, train_loader, val_loa
 
 
 def main(args):
-    logger = common.setup_logger(args)
+    logger = log.setup_logger(args)
 
     # Lets cuDNN benchmark conv implementations and choose the fastest.
     # Only good if sizes stay the same within the main loop!
@@ -273,12 +274,9 @@ def main(args):
 
     train_set, val_set, train_loader, val_loader = mktrainval(args, logger)
 
-    model_path, model = args.model_path, args.model
-
-    model_path = os.path.join(args.model_path, 'bit.pth.tar')
-    logger.info(f"Loading model from {model_path}")
-    model = resnetv2.KNOWN_MODELS[model](head_size=len(train_set.classes))
-    state_dict = torch.load(model_path)
+    logger.info(f"Loading model from {args.model_path}")
+    model = resnetv2.KNOWN_MODELS[args.model](head_size=len(train_set.classes))
+    state_dict = torch.load(args.model_path)
     model.load_state_dict_custom(state_dict['model'])
 
     logger.info("Moving model onto all GPUs")
