@@ -159,7 +159,7 @@ def run_eval(model, in_loader, out_loader, logger, args, num_classes):
 
         temp_x = torch.rand(2, 3, 480, 480)
         temp_x = Variable(temp_x).cuda()
-        temp_list = model(temp_x, layer_index='all')[1]
+        temp_list = model(x=temp_x, layer_index='all')[1]
         num_output = len(temp_list)
 
         logger.info("Processing in-distribution data...")

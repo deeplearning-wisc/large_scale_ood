@@ -48,7 +48,10 @@ def run_eval(model, in_loader, out_loader, logger, group_slices):
     logger.info("Running validation...")
     logger.flush()
 
+    logger.info("Processing in-distribution data...")
     in_confs = iterate_data(in_loader, model, group_slices)
+
+    logger.info("Processing out-of-distribution data...")
     out_confs = iterate_data(out_loader, model, group_slices)
 
     in_examples = in_confs.reshape((-1, 1))

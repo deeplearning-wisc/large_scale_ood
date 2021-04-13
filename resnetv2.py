@@ -116,7 +116,7 @@ class ResNetV2(nn.Module):
         wf = width_factor  # shortcut 'cause we'll use it a lot.
 
         if num_block_open == -1:
-            self.fix_parts = None
+            self.fix_parts = []
             self.fix_gn1 = None
         elif num_block_open == 0:
             self.fix_parts = ['root', 'block1', 'block2', 'block3', 'block4', 'before_head']

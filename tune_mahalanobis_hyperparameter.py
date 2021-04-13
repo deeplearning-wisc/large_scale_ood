@@ -59,7 +59,7 @@ def tune_mahalanobis_hyperparams(args, model, num_classes, train_loader, val_loa
     # set information about feature extaction
     temp_x = torch.rand(2, 3, 480, 480)
     temp_x = Variable(temp_x).cuda()
-    temp_list = model(temp_x, layer_index='all')[1]
+    temp_list = model(x=temp_x, layer_index='all')[1]
     num_output = len(temp_list)
     feature_list = np.empty(num_output)
     count = 0
@@ -106,7 +106,7 @@ def tune_mahalanobis_hyperparams(args, model, num_classes, train_loader, val_loa
         if cnt == 2*m:
             break
 
-    logger.info('In', len(train_in), len(val_in))
+    logger.info('In {} {}'.format(len(train_in), len(val_in)))
 
     criterion = nn.CrossEntropyLoss().cuda()
     adv_noise = 0.05
@@ -160,7 +160,7 @@ def tune_mahalanobis_hyperparams(args, model, num_classes, train_loader, val_loa
 
         val_out.extend(adv_data.cpu().numpy())
 
-    logger.info('Out', len(train_out),len(val_out))
+    logger.info('Out {} {}'.format(len(train_out),len(val_out)))
 
     train_lr_data = []
     train_lr_label = []
@@ -188,7 +188,7 @@ def tune_mahalanobis_hyperparams(args, model, num_classes, train_loader, val_loa
         train_lr_Mahalanobis = np.asarray(train_lr_Mahalanobis, dtype=np.float32)
         regressor = LogisticRegressionCV(n_jobs=-1).fit(train_lr_Mahalanobis, train_lr_label)
 
-        logger.info('Logistic Regressor params:', regressor.coef_, regressor.intercept_)
+        logger.info('Logistic Regressor params: {} {}'.format(regressor.coef_, regressor.intercept_))
 
         t0 = time.time()
         f1 = open(os.path.join(save_dir, "confidence_mahalanobis_In.txt"), 'w')
@@ -258,8 +258,8 @@ def tune_mahalanobis_hyperparams(args, model, num_classes, train_loader, val_loa
             best_magnitude = magnitude
             best_regressor = regressor
 
-    logger.info('Best Logistic Regressor params:', best_regressor.coef_, best_regressor.intercept_)
-    logger.info('Best magnitude', best_magnitude)
+    logger.info('Best Logistic Regressor params: {} {}'.format(best_regressor.coef_, best_regressor.intercept_))
+    logger.info('Best magnitude: {}'.format(best_magnitude))
 
     return sample_mean, precision, best_regressor, best_magnitude
 
@@ -316,7 +316,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--logdir", required=True,
                         help="Where to log training info (small).")
-    parser.add_argument("--batch", type=int, default=64,
+    parser.add_argument("--batch", type=int, default=32,
                         help="Batch size.")
     parser.add_argument("--name", required=True,
                         help="Name of this run. Used for monitoring and checkpointing.")

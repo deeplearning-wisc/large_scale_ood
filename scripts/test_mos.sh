@@ -7,7 +7,7 @@ python test_mos.py \
 --name test_${MODEL}_mos_${OUT_DATA} \
 --in_datadir dataset/id_data/ILSVRC-2012 \
 --in_data_list data_lists/imagenet2012_val_list.txt \
---out_datadir data_lists/ood_data/${OUT_DATA} \
+--out_datadir dataset/ood_data/${OUT_DATA} \
 --out_data_list data_lists/${OUT_DATA}_selected_list.txt \
 --model ${MODEL} \
 --model_path checkpoints/finetune/finetune_group_softmax_${MODEL} \
