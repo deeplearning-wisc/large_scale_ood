@@ -1,6 +1,6 @@
 import os
 import logging
-
+import logging.config
 
 def setup_logger(args):
     """Creates and returns a fancy logger."""
