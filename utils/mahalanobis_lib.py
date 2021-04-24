@@ -1,11 +1,9 @@
 from __future__ import print_function
 import torch
 import numpy as np
-import torch.nn as nn
-import torch.nn.functional as F
 
 from torch.autograd import Variable
-from scipy.spatial.distance import pdist, cdist, squareform
+
 
 def sample_estimator(model, num_classes, feature_list, train_loader):
     """

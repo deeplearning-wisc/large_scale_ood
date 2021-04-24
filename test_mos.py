@@ -7,7 +7,6 @@ import numpy as np
 
 from utils.test_utils import arg_parser, mk_id_ood, get_measures
 from finetune import get_group_slices
-import os
 
 
 def cal_ood_score(logits, group_slices):

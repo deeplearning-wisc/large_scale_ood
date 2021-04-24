@@ -1,19 +1,3 @@
-# Copyright 2020 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# Lint as: python3
-# coding: utf-8
 
 import argparse
 
@@ -48,7 +32,9 @@ def argparser():
                         help="Number of background threads used to load data.")
     parser.add_argument("--no-save", dest="save", action="store_false")
 
-    parser.add_argument("--num_block_open", type=int, choices=[-1, 0, 1, 2, 3, 4], default=0)
+    parser.add_argument("--num_block_open", type=int, choices=[-1, 0, 1, 2, 3, 4], default=0,
+                        help="How many resnet blocks to open in finetuning; there are totally 4 blocks in resnet arch;"
+                             "0 means only finetuning the top fc layer, while -1 means a full finetuning")
 
     parser.add_argument("--train_list", type=str, help="Data list for training data.")
     parser.add_argument("--val_list", type=str, help="Data list for validation data.")

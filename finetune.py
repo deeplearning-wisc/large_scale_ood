@@ -1,22 +1,7 @@
-# Copyright 2020 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# Lint as: python3
 """Fine-tune a BiT model on some downstream dataset."""
 # !/usr/bin/env python3
 # coding: utf-8
-from os.path import join as pjoin  # pylint: disable=g-importing-member
+from os.path import join as pjoin
 
 import numpy as np
 import torch
@@ -82,17 +67,9 @@ def mktrainval(args, logger):
         valid_set, batch_size=micro_batch_size, shuffle=False,
         num_workers=args.workers, pin_memory=True, drop_last=False)
 
-    if micro_batch_size <= len(train_set):
-        train_loader = torch.utils.data.DataLoader(
-            train_set, batch_size=micro_batch_size, shuffle=True,
-            num_workers=args.workers, pin_memory=True, drop_last=False)
-    else:
-        # In the few-shot cases, the total dataset size might be smaller than the batch-size.
-        # In these cases, the default sampler doesn't repeat, so we need to make it do that
-        # if we want to match the behaviour from the paper.
-        train_loader = torch.utils.data.DataLoader(
-            train_set, batch_size=micro_batch_size, num_workers=args.workers, pin_memory=True,
-            sampler=torch.utils.data.RandomSampler(train_set, replacement=True, num_samples=micro_batch_size))
+    train_loader = torch.utils.data.DataLoader(
+        train_set, batch_size=micro_batch_size, shuffle=True,
+        num_workers=args.workers, pin_memory=True, drop_last=False)
 
     return train_set, valid_set, train_loader, valid_loader
 
@@ -113,7 +90,7 @@ def run_eval(model, data_loader, logger, step, writer, group_slices):
             # compute output, measure accuracy and record loss.
             logits = model(x)
             if group_slices is not None:
-                c, top1 = cal_acc(logits, y, group_slices)
+                c, top1 = calc_group_softmax_acc(logits, y, group_slices)
             else:
                 c = torch.nn.CrossEntropyLoss(reduction='none')(logits, y)
                 top1 = topk(logits, y, ks=(1,))[0]
@@ -144,8 +121,8 @@ def mixup_criterion_flat(criterion, pred, y_a, y_b, l):
 
 
 def mixup_criterion_group(criterion, pred, y_a, y_b, l, group_slices):
-    return l * get_loss(criterion, pred, y_a, group_slices) \
-           + (1 - l) * get_loss(criterion, pred, y_b, group_slices)
+    return l * calc_group_softmax_loss(criterion, pred, y_a, group_slices) \
+           + (1 - l) * calc_group_softmax_loss(criterion, pred, y_b, group_slices)
 
 
 def get_group_slices(classes_per_group):
@@ -158,7 +135,7 @@ def get_group_slices(classes_per_group):
     return torch.LongTensor(group_slices)
 
 
-def cal_acc(logits, labels, group_slices):
+def calc_group_softmax_acc(logits, labels, group_slices):
     num_groups = group_slices.shape[0]
     loss = 0
     num_samples = logits.shape[0]
@@ -187,21 +164,19 @@ def cal_acc(logits, labels, group_slices):
     final_max_score, max_group = torch.max(all_group_max_score, dim=1)
 
     pred_cls_within_group = all_group_max_class[torch.arange(num_samples), max_group]
-    # print(pred_cls_within_group)
 
     gt_class, gt_group = torch.max(labels, dim=1)
 
     selected_groups = (max_group == gt_group)
 
     pred_acc = torch.zeros(logits.shape[0]).bool().cuda()
-    # print(pred_acc)
 
     pred_acc[selected_groups] = (pred_cls_within_group[selected_groups] == gt_class[selected_groups])
 
     return loss, pred_acc
 
 
-def get_loss(criterion, logits, labels, group_slices):
+def calc_group_softmax_loss(criterion, logits, labels, group_slices):
     num_groups = group_slices.shape[0]
     loss = 0
     for i in range(num_groups):
@@ -303,7 +278,7 @@ def main(args):
             if mixup > 0.0:
                 c = mixup_criterion_group(cri, logits, y_a, y_b, mixup_l, group_slices)
             else:
-                c = get_loss(cri, logits, y, group_slices)
+                c = calc_group_softmax_loss(cri, logits, y, group_slices)
         else:
             if mixup > 0.0:
                 c = mixup_criterion_flat(cri, logits, y_a, y_b, mixup_l)

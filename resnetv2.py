@@ -1,26 +1,10 @@
-# Copyright 2020 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-# Lint as: python3
 """Bottleneck ResNet v2 with GroupNorm and Weight Standardization."""
 
-from collections import OrderedDict  # pylint: disable=g-importing-member
+from collections import OrderedDict
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import math
 
 
 class StdConv2d(nn.Conv2d):
@@ -136,8 +120,6 @@ class ResNetV2(nn.Module):
         else:
             raise ValueError('Unexpected block number {}'.format(num_block_open))
 
-        # The following will be unreadable if we split lines.
-        # pylint: disable=line-too-long
         self.root = nn.Sequential(OrderedDict([
             ('conv', StdConv2d(3, 64 * wf, kernel_size=7, stride=2, padding=3, bias=False)),
             ('pad', nn.ConstantPad2d(1, 0)),
@@ -168,7 +150,6 @@ class ResNetV2(nn.Module):
                  range(2, block_units[3] + 1)],
             ))),
         ]))
-        # pylint: enable=line-too-long
 
         self.zero_head = zero_head
 
@@ -193,39 +174,42 @@ class ResNetV2(nn.Module):
                 for param in block.unit01.gn1.parameters():
                     param.requires_grad = False
 
+    def intermediate_forward(self, x, layer_index=None):
+        if layer_index == 'all':
+            out_list = []
+            out = self.root(x)
+            out_list.append(out)
+            out = self.body.block1(out)
+            out_list.append(out)
+            out = self.body.block2(out)
+            out_list.append(out)
+            out = self.body.block3(out)
+            out_list.append(out)
+            out = self.body.block4(out)
+            out_list.append(out)
+            out = self.head(self.before_head(out))
+            return out[..., 0, 0], out_list
+
+        out = self.root(x)
+        if layer_index == 1:
+            out = self.body.block1(out)
+        elif layer_index == 2:
+            out = self.body.block1(out)
+            out = self.body.block2(out)
+        elif layer_index == 3:
+            out = self.body.block1(out)
+            out = self.body.block2(out)
+            out = self.body.block3(out)
+        elif layer_index == 4:
+            out = self.body.block1(out)
+            out = self.body.block2(out)
+            out = self.body.block3(out)
+            out = self.body.block4(out)
+        return out
+
     def forward(self, x, layer_index=None):
         if layer_index is not None:
-            if layer_index == 'all':
-                out_list = []
-                out = self.root(x)
-                out_list.append(out)
-                out = self.body.block1(out)
-                out_list.append(out)
-                out = self.body.block2(out)
-                out_list.append(out)
-                out = self.body.block3(out)
-                out_list.append(out)
-                out = self.body.block4(out)
-                out_list.append(out)
-                out = self.head(self.before_head(out))
-                return out[..., 0, 0], out_list
-
-            out = self.root(x)
-            if layer_index == 1:
-                out = self.body.block1(out)
-            elif layer_index == 2:
-                out = self.body.block1(out)
-                out = self.body.block2(out)
-            elif layer_index == 3:
-                out = self.body.block1(out)
-                out = self.body.block2(out)
-                out = self.body.block3(out)
-            elif layer_index == 4:
-                out = self.body.block1(out)
-                out = self.body.block2(out)
-                out = self.body.block3(out)
-                out = self.body.block4(out)
-            return out
+            return self.intermediate_forward(x, layer_index)
 
         if 'root' in self.fix_parts:
             with torch.no_grad():
@@ -279,6 +263,7 @@ class ResNetV2(nn.Module):
         self.training = mode
         for module in self.children():
             module.train(mode)
+
         self.head.train(mode)
         if 'root' in self.fix_parts:
             self.root.eval()

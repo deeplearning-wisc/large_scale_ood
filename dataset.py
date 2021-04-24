@@ -28,7 +28,6 @@ class DatasetWithMeta(Dataset):
             self.cls_idx.append(int(segs[-1]))
             self.classes.add(int(segs[-1]))
         self.num = len(self.images)
-        # self.classes = len(self.cls_set)
 
     def __len__(self):
         return self.num
@@ -71,7 +70,6 @@ class DatasetWithMetaGroup(Dataset):
             self.classes.add((group_idx, sub_cls_idx))
 
         self.num = len(self.images)
-        # self.classes = len(self.cls_set)
 
     def __len__(self):
         return self.num

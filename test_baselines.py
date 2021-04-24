@@ -256,6 +256,6 @@ if __name__ == "__main__":
     parser.add_argument('--temperature_energy', default=1, type=int,
                         help='temperature scaling for energy')
 
-    parser.add_argument('--mahalanobis_param_path')
+    parser.add_argument('--mahalanobis_param_path', help='path to tuned mahalanobis parameters')
 
     main(parser.parse_args())
