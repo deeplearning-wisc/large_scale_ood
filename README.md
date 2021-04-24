@@ -13,9 +13,9 @@ Please download [ImageNet-1k](http://www.image-net.org/challenges/LSVRC/2012/ind
 ##### Out-of-distribution dataset
 
 Please download the 4 OOD datasets we curated from the following links:
-[iNaturalist](http://pages.cs.wisc.edu/~huangrui/imagenet_ood_dataset/iNaturalist.tar.gz),
-[SUN](http://pages.cs.wisc.edu/~huangrui/imagenet_ood_dataset/SUN.tar.gz),
-[Places](http://pages.cs.wisc.edu/~huangrui/imagenet_ood_dataset/Places.tar.gz),
+<a href="http://pages.cs.wisc.edu/~huangrui/imagenet_ood_dataset/iNaturalist.tar.gz" target="_blank">iNaturalist</a>,
+<a href="http://pages.cs.wisc.edu/~huangrui/imagenet_ood_dataset/SUN.tar.gz" target="_blank">SUN</a>,
+<a href="http://pages.cs.wisc.edu/~huangrui/imagenet_ood_dataset/Places.tar.gz" target="_blank">Places</a>,
 [Textures](https://www.robots.ox.ac.uk/~vgg/data/dtd/),
 and put them into `./dataset/ood_data/`. For more details about these OOD datasets, please check out our [paper]().
 
@@ -60,7 +60,8 @@ Note: before testing Mahalanobis, make sure you have tuned and saved its hyperpa
 ### Our Fine-tuned Model
 
 To facilitate the reproduction of the results reported in our paper, we also provide our 
-[group-softmax finetuned model](http://pages.cs.wisc.edu/~huangrui/finetuned_model/BiT-S-R101x1-group-finetune.pth.tar) 
-and [flat-softmax finetuned model](http://pages.cs.wisc.edu/~huangrui/finetuned_model/BiT-S-R101x1-flat-finetune.pth.tar).
+<a href="http://pages.cs.wisc.edu/~huangrui/finetuned_model/BiT-S-R101x1-group-finetune.pth.tar" target="_blank">group-softmax finetuned model</a>, 
+and
+<a href="http://pages.cs.wisc.edu/~huangrui/finetuned_model/BiT-S-R101x1-flat-finetune.pth.tar" target="_blank">flat-softmax finetuned model</a>.
 After downloading the provided models, you can skip Step 3
 and set `--model_path` in scripts in Step 4 accordingly.
