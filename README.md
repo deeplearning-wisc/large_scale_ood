@@ -12,12 +12,26 @@ Please download [ImageNet-1k](http://www.image-net.org/challenges/LSVRC/2012/ind
 
 ##### Out-of-distribution dataset
 
-Please download the 4 OOD datasets we curated from the following links:
-<a href="http://pages.cs.wisc.edu/~huangrui/imagenet_ood_dataset/iNaturalist.tar.gz" target="_blank">iNaturalist</a>,
-<a href="http://pages.cs.wisc.edu/~huangrui/imagenet_ood_dataset/SUN.tar.gz" target="_blank">SUN</a>,
-<a href="http://pages.cs.wisc.edu/~huangrui/imagenet_ood_dataset/Places.tar.gz" target="_blank">Places</a>,
-[Textures](https://www.robots.ox.ac.uk/~vgg/data/dtd/),
-and put them into `./dataset/ood_data/`. For more details about these OOD datasets, please check out our [paper]().
+We have curated 4 OOD datasets from 
+[iNaturalist](https://arxiv.org/pdf/1707.06642.pdf), 
+[SUN](https://vision.princeton.edu/projects/2010/SUN/paper.pdf), 
+[Places](http://places2.csail.mit.edu/PAMI_places.pdf), 
+and [Textures](https://arxiv.org/pdf/1311.3618.pdf), 
+and de-duplicated concepts overlapped with ImageNet-1k.
+
+For iNaturalist, SUN, and Places, we have sampled 10,000 images from the selected concepts for each dataset,
+which can be download via the following links:
+```bash
+wget http://pages.cs.wisc.edu/~huangrui/imagenet_ood_dataset/iNaturalist.tar.gz
+wget http://pages.cs.wisc.edu/~huangrui/imagenet_ood_dataset/SUN.tar.gz
+wget http://pages.cs.wisc.edu/~huangrui/imagenet_ood_dataset/Places.tar.gz
+```
+
+For Textures, we use the entire dataset, which can be downloaded from their
+[original website](https://www.robots.ox.ac.uk/~vgg/data/dtd/).
+
+Please put all downloaded OOD datasets into `./dataset/ood_data/`.
+For more details about these OOD datasets, please check out our [paper]().
 
 #### 2. Pre-trained Model Preparation
 
@@ -59,9 +73,11 @@ Note: before testing Mahalanobis, make sure you have tuned and saved its hyperpa
 
 ### Our Fine-tuned Model
 
-To facilitate the reproduction of the results reported in our paper, we also provide our 
-<a href="http://pages.cs.wisc.edu/~huangrui/finetuned_model/BiT-S-R101x1-group-finetune.pth.tar" target="_blank">group-softmax finetuned model</a>, 
-and
-<a href="http://pages.cs.wisc.edu/~huangrui/finetuned_model/BiT-S-R101x1-flat-finetune.pth.tar" target="_blank">flat-softmax finetuned model</a>.
+To facilitate the reproduction of the results reported in our paper, we also provide our group-softmax finetuned model 
+and flat-softmax finetuned model, which can be downloaded via the following links:
+```bash
+wget http://pages.cs.wisc.edu/~huangrui/finetuned_model/BiT-S-R101x1-group-finetune.pth.tar
+wget http://pages.cs.wisc.edu/~huangrui/finetuned_model/BiT-S-R101x1-flat-finetune.pth.tar
+```
 After downloading the provided models, you can skip Step 3
 and set `--model_path` in scripts in Step 4 accordingly.
