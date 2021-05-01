@@ -1,5 +1,17 @@
-This is the source code for our paper [MOS: Towards Scaling Out-of-distribution Detection for Large Semantic Space]().
-Code for model finetuning is adapted from [Google BiT](https://github.com/google-research/big_transfer).
+This is the source code for our paper [MOS: Towards Scaling Out-of-distribution Detection for Large Semantic Space]()
+by Rui Huang and Sharon Li.
+Code is modified from [Google BiT](https://github.com/google-research/big_transfer),
+[ODIN](https://github.com/facebookresearch/odin),
+[Outlier Exposure](https://github.com/hendrycks/outlier-exposure),
+[deep Mahalanobis detector](https://github.com/pokaxpoka/deep_Mahalanobis_detector)
+and [Robust OOD Detection](https://github.com/jfc43/robust-ood-detection).
+
+This is a group-based OOD detection framework that is effective for large-scale image classification.
+Our key idea is to decompose the large semantic space into smaller groups with similar concepts,
+which allows simplifying the decision boundary and reducing the uncertainty space between in- vs. out-of-distribution data.
+
+![model_architecture](demo_figs/model_with_data.svg)
+
 
 ### Usage
 
@@ -44,13 +56,13 @@ The backbone used in our paper for main results is `BiT-S-R101x1`.
 For group-softmax finetuning (MOS), please run:
 
 ```
-./scripts/finetune_group_softmax.sh
+bash ./scripts/finetune_group_softmax.sh
 ```
 
 For flat-softmax finetuning (baselines), please run:
 
 ```
-./scripts/finetune_flat_softmax.sh
+bash ./scripts/finetune_flat_softmax.sh
 ```
 
 
@@ -58,17 +70,17 @@ For flat-softmax finetuning (baselines), please run:
 
 To reproduce our MOS results, please run:
 ```
-./scripts/test_mos.sh iNaturalist(/SUN/Places/Textures)
+bash ./scripts/test_mos.sh iNaturalist(/SUN/Places/Textures)
 ```
 
 To reproduce baseline approaches, please run:
 ```
-./scripts/test_baselines.sh MSP(/ODIN/Energy/Mahalanobis/KL_Div) iNaturalist(/SUN/Places/Textures)
+bash ./scripts/test_baselines.sh MSP(/ODIN/Energy/Mahalanobis/KL_Div) iNaturalist(/SUN/Places/Textures)
 ```
 
 Note: before testing Mahalanobis, make sure you have tuned and saved its hyperparameters first by running:
 ```
-./scripts/tune_mahalanobis.sh
+bash ./scripts/tune_mahalanobis.sh
 ```
 
 ### Our Fine-tuned Model
@@ -81,3 +93,21 @@ wget http://pages.cs.wisc.edu/~huangrui/finetuned_model/BiT-S-R101x1-flat-finetu
 ```
 After downloading the provided models, you can skip Step 3
 and set `--model_path` in scripts in Step 4 accordingly.
+
+### OOD Detection Results
+
+MOS achieves state-of-the-art performance averaged on the 4 OOD datasets.
+
+![results](demo_figs/main_result.png)
+
+### Citation
+
+If you use our codebase or OOD datasets, please cite our work:
+```
+@inproceedings{huang2021mos,
+  title={MOS: Towards Scaling Out-of-distribution Detection for Large Semantic Space},
+  author={Huang, Rui and Li, Yixuan},
+  booktitle={Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+  year={2021}
+}
+```
