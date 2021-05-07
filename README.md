@@ -1,6 +1,6 @@
 # MOS: Towards Scaling Out-of-distribution Detection for Large Semantic Space
 
-This is the source code for our paper [MOS: Towards Scaling Out-of-distribution Detection for Large Semantic Space]()
+This is the source code for our paper [MOS: Towards Scaling Out-of-distribution Detection for Large Semantic Space](https://arxiv.org/abs/2105.01879)
 by Rui Huang and Sharon Li.
 Code is modified from [Google BiT](https://github.com/google-research/big_transfer),
 [ODIN](https://github.com/facebookresearch/odin),
