@@ -76,7 +76,7 @@ def tune_mahalanobis_hyperparams(args, model, num_classes, train_loader, val_loa
 
     sample_mean, precision = np.load(filename, allow_pickle=True)
     sample_mean = [s.cuda() for s in sample_mean]
-    precision = [p.cuda() for p in precision]
+    precision = [torch.from_numpy(p).float().cuda() for p in precision]
 
     logger.info('train logistic regression model')
     m = 500
